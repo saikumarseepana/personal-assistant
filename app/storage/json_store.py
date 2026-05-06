@@ -1,0 +1,7 @@
+import json
+
+class JSONStore:
+    def save(self, data, filename='emails.json'):
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=4)
+            
