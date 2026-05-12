@@ -1,9 +1,11 @@
 from googleapiclient.discovery import build
+from app.processors.email_processor import EmailProcessor
 
 
 class GmailService:
     def __init__(self, creds):
         self.service = build('gmail', 'v1', credentials=creds)
+        self.processor = EmailProcessor()
 
     def fetch_emails(self, max_results=20):
         results = self.service.users().messages().list(
@@ -20,16 +22,9 @@ class GmailService:
                 id=msg['id']
             ).execute()
 
-            headers = msg_detail['payload']['headers']
+            processed_email = self.processor.extract_email_data(msg_detail)
 
-            subject = next(
-                (h['value'] for h in headers if h['name'] == 'Subject'),
-                None
-            )
 
-            email_data.append({
-                'id': msg['id'],
-                'subject': subject
-            })
+            email_data.append(processed_email)
 
         return email_data
